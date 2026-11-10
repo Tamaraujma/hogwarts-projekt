@@ -51,26 +51,20 @@ export async function getStudentsForCourse(courseId) {
      JOIN students s ON cs.student_id = s.id
      WHERE cs.course_id = $1
      ORDER BY s.id`,
-    [courseId]
+    [courseId],
   );
 
   return result.rows;
 }
 
 export async function addStudentToCourse(courseId, studentId) {
-  const result = await pool.query(
-    "INSERT INTO course_students (course_id, student_id) VALUES ($1, $2) RETURNING *",
-    [courseId, studentId]
-  );
+  const result = await pool.query("INSERT INTO course_students (course_id, student_id) VALUES ($1, $2) RETURNING *", [courseId, studentId]);
 
   return result.rows[0];
 }
 
 export async function removeStudentFromCourse(courseId, studentId) {
-  const result = await pool.query(
-    "DELETE FROM course_students WHERE course_id = $1 AND student_id = $2 RETURNING *",
-    [courseId, studentId]
-  );
+  const result = await pool.query("DELETE FROM course_students WHERE course_id = $1 AND student_id = $2 RETURNING *", [courseId, studentId]);
 
   if (result.rowCount === 0) {
     return null;
