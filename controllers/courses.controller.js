@@ -1,109 +1,91 @@
 import * as coursesRepository from "../repositories/courses.repository.js";
+import HTTPError from "../errorhandling.js/HTTPError.js";
 
 export async function getAllCourses(req, res) {
-  try {
-    const courses = await coursesRepository.getAllCourses();
-    res.status(200).json(courses);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Database error" });
+  // try {
+  const courses = await coursesRepository.getAllCourses();
+
+  if (!courses) {
+    throw new HTTPError(404, "Courses not found");
   }
+  res.status(200).json(courses);
+
+  // } catch (error) {
+  //   console.error(error);
+  //   res.status(500).json({ error: "Database error" });
+  // }
 }
 
 export async function getSingleCourse(req, res) {
-  try {
-    const id = req.params.id;
-    const course = await coursesRepository.getCourseById(id);
+  const id = req.params.id;
+  const course = await coursesRepository.getCourseById(id);
 
-    if (!course) {
-      return res.sendStatus(404);
-    }
-
-    res.status(200).json(course);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Database error" });
+  if (!course) {
+    throw new HTTPError(404, "Course not found");
   }
+
+  res.status(200).json(course);
 }
 
 export async function createCourse(req, res) {
-  try {
-    const newCourse = await coursesRepository.createCourse(req.body);
-    res.status(201).json(newCourse);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Database error" });
+  const newCourse = await coursesRepository.createCourse(req.body);
+
+  if (!newCourse) {
+    throw new HTTPError(400, "Course not created");
   }
+  res.status(201).json(newCourse);
 }
 
 export async function updateCourse(req, res) {
-  try {
-    const updatedCourse = await coursesRepository.updateCourse(req.params.id, req.body);
+  const updatedCourse = await coursesRepository.updateCourse(req.params.id, req.body);
 
-    if (!updatedCourse) {
-      return res.sendStatus(404);
-    }
-
-    res.status(200).json(updatedCourse);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Database error" });
+  if (!updatedCourse) {
+    throw new HTTPError(404, "Course not found");
   }
+
+  res.status(200).json(updatedCourse);
 }
 
 export async function deleteCourse(req, res) {
-  try {
-    const deleted = await coursesRepository.deleteCourse(req.params.id);
+  const deleted = await coursesRepository.deleteCourse(req.params.id);
 
-    if (!deleted) {
-      return res.sendStatus(404);
-    }
-
-    res.sendStatus(204);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Database error" });
+  if (!deleted) {
+    throw new HTTPError(404, "Course not found");
   }
+
+  res.status(204).json(deleted);
 }
 
 export async function getCourseStudents(req, res) {
-  try {
-    const courseId = req.params.courseId;
-    const students = await coursesRepository.getStudentsForCourse(courseId);
-    res.status(200).json(students);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Database error" });
+  const courseId = req.params.courseId;
+  const students = await coursesRepository.getStudentsForCourse(courseId);
+
+  if (!students) {
+    throw new HTTPError(404, "Students not found for this course");
   }
+  res.status(200).json(students);
 }
 
 export async function addStudentToCourse(req, res) {
-  try {
-    const courseId = req.params.courseId;
-    const studentId = req.params.studentId;
+  const courseId = req.params.courseId;
+  const studentId = req.params.studentId;
 
-    const relation = await coursesRepository.addStudentToCourse(courseId, studentId);
-    res.status(201).json(relation);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Database error" });
+  const relation = await coursesRepository.addStudentToCourse(courseId, studentId);
+  if (!relation) {
+    throw new HTTPError(400, "Student could not be added to course");
   }
+  res.status(201).json(relation);
 }
 
 export async function removeStudentFromCourse(req, res) {
-  try {
-    const courseId = req.params.courseId;
-    const studentId = req.params.studentId;
+  const courseId = req.params.courseId;
+  const studentId = req.params.studentId;
 
-    const deleted = await coursesRepository.removeStudentFromCourse(courseId, studentId);
+  const deleted = await coursesRepository.removeStudentFromCourse(courseId, studentId);
 
-    if (!deleted) {
-      return res.sendStatus(404);
-    }
-
-    res.sendStatus(204);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Database error" });
+  if (!deleted) {
+    throw new HTTPError(404, "Student not found in this course");
   }
+
+  res.sendStatus(204).json(deleted);
 }
